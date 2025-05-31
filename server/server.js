@@ -28,12 +28,11 @@ app.use(morgan('dev'));
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/facebook-helpdesk', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-  socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+  serverSelectionTimeoutMS: 5000, 
+  socketTimeoutMS: 45000, 
 })
 .then(() => {
   console.log('Connected to MongoDB');
-  // Start server only after DB connection is established
   const PORT = process.env.PORT || 5001;
   httpServer.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
@@ -41,10 +40,10 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/facebook-
 })
 .catch((err) => {
   console.error('MongoDB connection error:', err);
-  process.exit(1); // Exit if cannot connect to database
+  process.exit(1); 
 });
 
-// Socket.io connection handling
+
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
 
@@ -53,12 +52,11 @@ io.on('connection', (socket) => {
   });
 });
 
-// Make io accessible to our routes
+
 app.set('io', io);
 
-// Routes (to be implemented)
+
 app.use('/api/auth', require('./routes/auth'));
-// app.use('/api/users', require('./routes/users'));
 app.use('/api/facebook', require('./routes/facebook'));
 app.use('/webhook', require('./fb-webhook'));
 
