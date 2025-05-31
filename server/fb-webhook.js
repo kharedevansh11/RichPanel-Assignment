@@ -27,6 +27,7 @@ router.get('/', (req, res) => {
 // Handle incoming messages
 router.post('/', async (req, res) => {
   const body = req.body;
+  const io = req.app.get('io'); // Get Socket.io instance
 
   if (body.object === 'page') {
     for (const entry of body.entry) {
@@ -122,6 +123,25 @@ router.post('/', async (req, res) => {
             });
 
             await message.save();
+
+            // Emit socket event for new message
+            io.emit('newMessage', {
+              conversationId: conversation._id,
+              message: {
+                senderId: senderId,
+                text: messageText,
+                timestamp: timestamp,
+                isEcho: false
+              }
+            });
+
+            // Emit socket event for conversation update
+            io.emit('conversationUpdate', {
+              conversationId: conversation._id,
+              lastMessageAt: timestamp,
+              senderName: conversation.senderName,
+              senderPicture: conversation.senderPicture
+            });
 
             console.log('Message processed and saved/updated.');
 

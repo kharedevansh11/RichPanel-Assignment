@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { SocketProvider } from './context/SocketContext';
 import FacebookIntegration from './pages/FacebookIntegration';
 import { useEffect } from 'react';
 import axios from 'axios';
@@ -101,34 +102,36 @@ function RedirectToFbIntegration() {
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <div className="min-h-screen bg-gray-100">
-          <ToastContainer position="top-right" autoClose={3000} />
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route 
-              path="/facebook-integration" 
-              element={
-                <PrivateRoute>
-                   <RedirectToFbIntegration />
-                </PrivateRoute>
-               }
-            />
-            <Route
-              path="/"
-              element={
-                <PrivateRoute>
-                   <RequireFbPage>
-                     <Dashboard />
-                   </RequireFbPage>
-                </PrivateRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </div>
-      </Router>
+      <SocketProvider>
+        <Router>
+          <div className="min-h-screen bg-gray-100">
+            <ToastContainer position="top-right" autoClose={3000} />
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route 
+                path="/facebook-integration" 
+                element={
+                  <PrivateRoute>
+                     <RedirectToFbIntegration />
+                  </PrivateRoute>
+                 }
+              />
+              <Route
+                path="/"
+                element={
+                  <PrivateRoute>
+                     <RequireFbPage>
+                       <Dashboard />
+                     </RequireFbPage>
+                  </PrivateRoute>
+                }
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </div>
+        </Router>
+      </SocketProvider>
     </AuthProvider>
   );
 }

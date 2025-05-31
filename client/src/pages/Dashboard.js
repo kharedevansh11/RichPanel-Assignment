@@ -8,9 +8,9 @@ import logo from '../assets/logo_richpanel.png';
 import { TbReload } from "react-icons/tb";
 import { RiMenu2Line } from "react-icons/ri";
 import { useAuth } from '../context/AuthContext';
+import { useSocket } from '../context/SocketContext';
 import { IoMdCall } from "react-icons/io";
 import { CgProfile } from "react-icons/cg";
-
 
 const Dashboard = () => {
   const [conversations, setConversations] = useState([]);
@@ -21,7 +21,35 @@ const Dashboard = () => {
   const [replyText, setReplyText] = useState('');
   const token = localStorage.getItem('token');
   const { user } = useAuth();
+  const { socket } = useSocket();
 
+  // Socket.io event listeners
+  useEffect(() => {
+    if (!socket) return;
+
+    // Listen for new messages
+    socket.on('newMessage', ({ conversationId, message }) => {
+      if (selectedConversation?._id === conversationId) {
+        setMessages(prev => [...prev, message]);
+      }
+      // Refresh conversations to update last message
+      fetchConversations();
+    });
+
+    // Listen for conversation updates
+    socket.on('conversationUpdate', ({ conversationId, lastMessageAt, senderName, senderPicture }) => {
+      setConversations(prev => prev.map(conv => 
+        conv._id === conversationId 
+          ? { ...conv, lastMessageAt, senderName, senderPicture }
+          : conv
+      ));
+    });
+
+    return () => {
+      socket.off('newMessage');
+      socket.off('conversationUpdate');
+    };
+  }, [socket, selectedConversation]);
 
   const fetchConversations = async () => {
     setLoadingConversations(true);

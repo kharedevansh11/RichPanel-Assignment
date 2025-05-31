@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 const APP_ID = process.env.REACT_APP_FACEBOOK_APP_ID;
 
 const FacebookIntegration = () => {
-  useFacebookSDK(APP_ID);
+  const isSDKInitialized = useFacebookSDK(APP_ID);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [fbPage, setFbPage] = useState(null);
@@ -32,7 +32,16 @@ const FacebookIntegration = () => {
 
   // connect to Facebook Page
   const handleConnect = () => {
-    if (!window.FB) return alert('Facebook SDK not loaded');
+    if (!isSDKInitialized) {
+      alert('Facebook SDK is still initializing. Please wait a moment and try again.');
+      return;
+    }
+
+    if (!window.FB) {
+      alert('Facebook SDK not loaded. Please refresh the page and try again.');
+      return;
+    }
+
     window.FB.login(
       function (response) {
         if (response.authResponse) {
@@ -57,7 +66,7 @@ const FacebookIntegration = () => {
                     };
                     // Save to backend
                     try {
-                      const res = await axios.post('http://localhost:5001/api/facebook/connect', pageData, {
+                      const res = await axios.post('/api/facebook/connect', pageData, {
                         headers: { Authorization: `Bearer ${token}` },
                       });
                       setFbPage(res.data.fbPage);
@@ -85,7 +94,7 @@ const FacebookIntegration = () => {
   // Disconnect the page
   const handleDisconnect = async () => {
     try {
-      await axios.delete('http://localhost:5001/api/facebook/connect', {
+      await axios.delete('/api/facebook/connect', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setFbPage(null);
@@ -120,15 +129,19 @@ const FacebookIntegration = () => {
                 Delete Integration
               </button>
               <button
-                className="btn btn-primary w-full "
+                className="btn btn-primary w-full"
                 onClick={() => navigate('/')}
               >
                 Reply To Messages
               </button>
             </>
           ) : (
-            <button className="btn btn-primary w-full mt-2" onClick={handleConnect}>
-              Connect Page
+            <button 
+              className={`btn btn-primary w-full mt-2 ${!isSDKInitialized ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={handleConnect}
+              disabled={!isSDKInitialized}
+            >
+              {isSDKInitialized ? 'Connect Page' : 'Initializing Facebook SDK...'}
             </button>
           )
         )}
