@@ -4,6 +4,8 @@
 
 This is a full-stack MERN application that serves as a Facebook Messenger management platform for businesses. The application allows companies to efficiently manage their Facebook Messenger conversations through a unified dashboard, making it easier for teams to handle customer communications.
 
+Dashboard:<img width="1438" alt="image" src="https://github.com/user-attachments/assets/2ceeca0e-f445-45b3-8154-375b2c0986dd" />
+
 ### Problem Statement
 Companies like Amazon receive thousands of Facebook messages daily, making it challenging to manage and distribute workload among team members directly through Facebook's interface. This application solves this problem by providing a centralized platform where teams can:
 - Connect their Facebook pages
@@ -163,91 +165,83 @@ npm start
 ### User
 ```javascript
 {
-  email: String,
-  password: String,
-  name: String,
-  role: {
+  name: {
     type: String,
-    enum: ['admin', 'agent'],
-    default: 'agent'
+    required: true,
+    trim: true
   },
-  facebookPages: [{
-    pageId: String,
-    pageName: String,
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true
+  },
+  password: {
+    type: String,
+    required: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  fbPage: {
+    id: String,
+    name: String,
     accessToken: String,
-    connectedAt: Date
-  }]
+    picture: String
+  }
 }
 ```
 
 ### Conversation
 ```javascript
 {
-  pageId: String,
-  customerId: String,
-  customerName: String,
-  customerProfilePic: String,
-  lastMessageAt: Date,
-  status: {
+  pageId: {
     type: String,
-    enum: ['active', 'resolved', 'archived'],
-    default: 'active'
+    required: true,
   },
-  assignedTo: {
+  senderId: { 
     type: String,
-    ref: 'User'
+    required: true,
   },
-  tags: [String],
-  createdAt: Date,
-  updatedAt: Date
+  senderName: String, 
+  senderPicture: String, 
+  lastMessageAt: {
+    type: Date,
+    default: Date.now,
+  },
+ 
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
 }
 ```
-
 ### Message
 ```javascript
 {
   conversationId: {
-    type: ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'Conversation',
-    required: true
+    required: true,
   },
-  sender: {
+  senderId: {
     type: String,
-    enum: ['customer', 'agent'],
-    required: true
+    required: true,
   },
-  senderId: String,
-  content: String,
-  timestamp: Date,
-  status: {
-    type: String,
-    enum: ['sent', 'delivered', 'read'],
-    default: 'sent'
+  text: String,
+  timestamp: {
+    type: Date,
+    default: Date.now,
   },
-  attachments: [{
-    type: {
-      type: String,
-      enum: ['image', 'file', 'video', 'audio']
-    },
-    url: String,
-    name: String,
-    size: Number
-  }],
-  metadata: {
-    facebookMessageId: String,
-    isFromPage: Boolean,
-    quickReplies: [{
-      title: String,
-      payload: String
-    }],
-    messageType: {
-      type: String,
-      enum: ['text', 'image', 'file', 'quick_reply', 'template']
-    }
+  isEcho: { 
+    type: Boolean,
+    default: false,
   }
 }
 ```
-
 ## Testing the Application
 
 1. **Register a new account**
@@ -260,16 +254,3 @@ npm start
    - Verify it appears in the dashboard
    - Reply to the message
    - Verify the reply is sent to Facebook
-
-## Future Improvements
-
-1. Team collaboration features
-2. Message templates
-3. Analytics dashboard
-4. Automated responses
-5. Multi-language support
-6. Mobile application
-
-## Contact
-
-For any questions about the implementation or setup, please reach out to [your-email@example.com] 
